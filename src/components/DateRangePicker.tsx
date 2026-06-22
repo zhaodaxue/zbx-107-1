@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Calendar } from 'lucide-react';
 import { useComplaintAnalysis } from '../hooks/useComplaintAnalysis';
 import { cn } from '../lib/utils';
@@ -13,9 +13,16 @@ export const DateRangePicker = ({ isOpen, onClose }: DateRangePickerProps) => {
   const [startDate, setStartDate] = useState(filters.dateRange.start);
   const [endDate, setEndDate] = useState(filters.dateRange.end);
 
-  const minDate = rawRecords.length > 0 ? rawRecords[0].date : '';
-  const maxDate =
-    rawRecords.length > 0 ? rawRecords[rawRecords.length - 1].date : '';
+  useEffect(() => {
+    if (isOpen) {
+      setStartDate(filters.dateRange.start);
+      setEndDate(filters.dateRange.end);
+    }
+  }, [isOpen, filters.dateRange.start, filters.dateRange.end]);
+
+  const allDates = rawRecords.map((r) => r.date).sort();
+  const minDate = allDates.length > 0 ? allDates[0] : '';
+  const maxDate = allDates.length > 0 ? allDates[allDates.length - 1] : '';
 
   const handleApply = () => {
     if (startDate && endDate && startDate <= endDate) {

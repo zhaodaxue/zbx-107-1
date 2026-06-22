@@ -50,7 +50,7 @@ interface LegendEventData {
 }
 
 export const WeeklyBarChart = () => {
-  const { getWeeklyChartData, parks, getParkColors, toggleParkSelection, filters } =
+  const { getWeeklyChartData, parks, getParkColors, filters } =
     useComplaintAnalysis();
   const [hiddenParks, setHiddenParks] = useState<Set<string>>(new Set());
 
@@ -60,7 +60,15 @@ export const WeeklyBarChart = () => {
   const handleLegendClick = (data: LegendEventData) => {
     const park = parks.find((p) => p.parkName === data.value);
     if (park) {
-      toggleParkSelection(park.parkId);
+      setHiddenParks((prev) => {
+        const next = new Set(prev);
+        if (next.has(park.parkId)) {
+          next.delete(park.parkId);
+        } else {
+          next.add(park.parkId);
+        }
+        return next;
+      });
     }
   };
 
@@ -78,10 +86,26 @@ export const WeeklyBarChart = () => {
   };
 
   const handleLegendMouseLeave = () => {
-    setHiddenParks(new Set());
+    setHiddenParks((prev) => {
+      if (prev.size === 0) return prev;
+      const park = parks.find(
+        (p) => !prev.has(p.parkId) && filters.selectedParks.includes(p.parkId)
+      );
+      if (park) {
+        const originalHidden = new Set<string>();
+        parks.forEach((p) => {
+          if (!filters.selectedParks.includes(p.parkId)) {
+            originalHidden.add(p.parkId);
+          }
+        });
+        return originalHidden;
+      }
+      return prev;
+    });
   };
 
-  const visibleParks = parks.filter((p) => filters.selectedParks.includes(p.parkId));
+  const visibleParks = parks
+    .filter((p) => filters.selectedParks.includes(p.parkId));
 
   if (chartData.length === 0) {
     return (
@@ -153,7 +177,9 @@ export const WeeklyBarChart = () => {
               onMouseLeave={handleLegendMouseLeave}
               formatter={(value) => {
                 const park = parks.find((p) => p.parkName === value);
-                const isSelected = park ? filters.selectedParks.includes(park.parkId) : true;
+                const isSelected = park
+                  ? !hiddenParks.has(park.parkId) && filters.selectedParks.includes(park.parkId)
+                  : true;
                 return (
                   <span
                     style={{

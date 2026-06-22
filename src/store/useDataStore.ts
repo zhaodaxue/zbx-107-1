@@ -116,10 +116,9 @@ export const useDataStore = create<DataState>((set, get) => ({
   recalculateData: () => {
     const { rawRecords, filters, parks } = get();
     const filtered = filterRecords(rawRecords, filters);
-    const activeParks =
-      filters.selectedParks.length > 0
-        ? parks.filter((p) => filters.selectedParks.includes(p.parkId))
-        : parks;
+    const activeParks = parks.filter((p) =>
+      filters.selectedParks.includes(p.parkId)
+    );
 
     const weekly = calculateWeeklyData(filtered, activeParks);
     const comparison = calculateComparisonData(filtered, activeParks);

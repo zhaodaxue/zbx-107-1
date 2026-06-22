@@ -14,7 +14,7 @@ const CSV_FILE_PATH = '/src/data/mock_complaints.csv';
 export const Dashboard = () => {
   const { isLoading, error } = useCsvData(CSV_FILE_PATH);
   const {
-    rawRecords,
+    filteredRecords,
     filters,
     heatingCount,
     totalCurrentWeek,
@@ -24,8 +24,8 @@ export const Dashboard = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleExport = () => {
-    if (rawRecords.length > 0) {
-      exportToCsv(rawRecords, filters.dateRange, '噪声投诉明细.csv');
+    if (filteredRecords.length > 0) {
+      exportToCsv(filteredRecords, filters.dateRange, '噪声投诉明细.csv');
     }
   };
 
